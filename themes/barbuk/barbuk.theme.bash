@@ -17,6 +17,8 @@ GIT_THEME_PROMPT_DIRTY=" ${bold_red}✗"
 GIT_THEME_PROMPT_CLEAN=" ${bold_green}✓"
 GIT_THEME_PROMPT_PREFIX="${cyan}"
 GIT_THEME_PROMPT_SUFFIX="${cyan} "
+SCM_THEME_BRANCH_TRACK_PREFIX=' ⤏  '
+
 
 RVM_THEME_PROMPT_PREFIX="|"
 RVM_THEME_PROMPT_SUFFIX="| "
@@ -34,7 +36,7 @@ icon_branch="🌿"
 
 function git_prompt_info {
   git_prompt_vars
-  echo -e " on $icon_branch  $SCM_PREFIX$SCM_BRANCH$SCM_STATE$SCM_GIT_AHEAD$SCM_GIT_BEHIND$SCM_GIT_STASH$SCM_SUFFIX"
+  echo -e " on $icon_branch $SCM_PREFIX$SCM_BRANCH$SCM_STATE$SCM_GIT_AHEAD$SCM_GIT_BEHIND$SCM_GIT_STASH$SCM_SUFFIX"
 }
 function iterate_last_status_prompt {
     if [[ "$1" -ne 0 ]]; then
