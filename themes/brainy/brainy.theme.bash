@@ -149,7 +149,7 @@ ___brainy_prompt_exitcode() {
 }
 
 ___brainy_prompt_char() {
-	color=$bold_white
+	color=$bold_green
 	prompt_char="${__BRAINY_PROMPT_CHAR_PS1}"
 	printf "%s|%s" "${color}" "${prompt_char}"
 }
