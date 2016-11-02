@@ -32,7 +32,7 @@ RBENV_THEME_PROMPT_SUFFIX="| "
 RBFU_THEME_PROMPT_PREFIX="|"
 RBFU_THEME_PROMPT_SUFFIX="| "
 
-icon_branch="🌿"
+icon_branch="🌿 "
 
 function git_prompt_info {
   git_prompt_vars
