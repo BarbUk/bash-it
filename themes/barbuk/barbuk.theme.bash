@@ -16,7 +16,7 @@ SCM_GIT_STAGED_CHAR="${bold_green}+${normal}"
 GIT_THEME_PROMPT_DIRTY=" ${bold_red}✗"
 GIT_THEME_PROMPT_CLEAN=" ${bold_green}✓"
 GIT_THEME_PROMPT_PREFIX="${cyan}"
-GIT_THEME_PROMPT_SUFFIX="${cyan} "
+GIT_THEME_PROMPT_SUFFIX="${cyan}"
 SCM_THEME_BRANCH_TRACK_PREFIX=' ⤏  '
 
 
@@ -32,12 +32,20 @@ RBENV_THEME_PROMPT_SUFFIX="| "
 RBFU_THEME_PROMPT_PREFIX="|"
 RBFU_THEME_PROMPT_SUFFIX="| "
 
-icon_branch="🌿 "
+case "$OSTYPE" in
+    "darwin" )
+        icon_branch="🌿 "
+        ;;
+    * )
+        icon_branch="🌿"
+        ;;
+esac
 
 function git_prompt_info {
   git_prompt_vars
   echo -e " on $icon_branch $SCM_PREFIX$SCM_BRANCH$SCM_STATE$SCM_GIT_AHEAD$SCM_GIT_BEHIND$SCM_GIT_STASH$SCM_SUFFIX"
 }
+
 function iterate_last_status_prompt {
     if [[ "$1" -ne 0 ]]; then
         LAST_STATUS_PROMPT="\n⚠ ${LAST_STATUS}"
