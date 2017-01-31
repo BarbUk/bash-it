@@ -64,4 +64,4 @@ function prompt_command() {
     PS1="${new_PS1}${green}${wrap_char}🠚 ${reset_color} "
 }
 
-PROMPT_COMMAND=prompt_command;
+safe_append_prompt_command prompt_command
