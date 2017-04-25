@@ -24,12 +24,12 @@ STATUS_THEME_PROMPT_OK="${bold_green}❯${reset_color}${normal} "
 
 function git_prompt_info {
   git_prompt_vars
-  echo -e "on $icon_branch  $SCM_PREFIX$SCM_BRANCH$SCM_STATE$SCM_GIT_AHEAD$SCM_GIT_BEHIND$SCM_GIT_STASH$SCM_SUFFIX"
+  echo -e "${normal}on $icon_branch  $SCM_PREFIX$SCM_BRANCH$SCM_STATE$SCM_GIT_AHEAD$SCM_GIT_BEHIND$SCM_GIT_STASH$SCM_SUFFIX"
 }
 
 function prompt_command() {
     local ret_status="$( [ $? -eq 0 ] && echo -e "$STATUS_THEME_PROMPT_OK" || echo -e "$STATUS_THEME_PROMPT_BAD")"
-    PS1="\n${purple}\u${bold_blue} in ${blue}\w $(scm_prompt_info)\n${ret_status}"
+    PS1="\n${bold_blue}\u${bold_orange} in ${orange}\w $(scm_prompt_info)\n${ret_status}"
 }
 
 safe_append_prompt_command prompt_command
