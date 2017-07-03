@@ -29,7 +29,15 @@ function myip ()
 {
     about 'displays your ip address, as seen by the Internet'
     group 'base'
-    res=$(curl -s checkip.dyndns.org | grep -Eo '[0-9\.]+')
+    list=("http://myip.dnsomatic.com/" "http://checkip.dyndns.com/" "http://checkip.dyndns.org/")
+    for url in ${list[*]}
+    do
+        res=$(curl -s "${url}")
+        if [ $? -eq 0 ];then
+            break;
+        fi
+    done
+    res=$(echo "$res" | grep -Eo '[0-9\.]+')
     echo -e "Your public IP is: ${echo_bold_green} $res ${echo_normal}"
 }
 
@@ -83,13 +91,14 @@ function pmdown ()
 
 function mkcd ()
 {
-    about 'make a directory and cd into it'
-    param 'path to create'
+    about 'make one or more directories and cd into the last one'
+    param 'one or more directories to create'
     example '$ mkcd foo'
     example '$ mkcd /tmp/img/photos/large'
+    example '$ mkcd foo foo1 foo2 fooN'
+    example '$ mkcd /tmp/img/photos/large /tmp/img/photos/self /tmp/img/photos/Beijing'
     group 'base'
-    mkdir -p -- "$*"
-    cd -- "$*"
+    mkdir -p -- "$@" && eval cd -- "\"\$$#\""
 }
 
 function lsgrep ()
