@@ -18,7 +18,7 @@ GIT_THEME_PROMPT_CLEAN=" ${bold_green}✓"
 GIT_THEME_PROMPT_PREFIX="${cyan}"
 GIT_THEME_PROMPT_SUFFIX="${cyan}"
 SCM_THEME_BRANCH_TRACK_PREFIX=' ⤏  '
-icon_branch="🌿 "
+icon_branch=""
 STATUS_THEME_PROMPT_BAD="${bold_red}❯${reset_color}${normal} "
 STATUS_THEME_PROMPT_OK="${bold_green}❯${reset_color}${normal} "
 
