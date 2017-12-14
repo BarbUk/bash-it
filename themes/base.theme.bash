@@ -376,7 +376,7 @@ function chruby_version_prompt {
 
     ruby_version=$(ruby --version | awk '{print $1, $2;}') || return
 
-    if [[ ! $(chruby | grep '*') ]]; then
+    if [[ ! $(chruby | grep '\*') ]]; then
       ruby_version="${ruby_version} (system)"
     fi
     echo -e "${CHRUBY_THEME_PROMPT_PREFIX}${ruby_version}${CHRUBY_THEME_PROMPT_SUFFIX}"

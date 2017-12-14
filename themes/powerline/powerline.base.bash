@@ -31,7 +31,7 @@ function __powerline_user_info_prompt {
       ;;
     *)
       if [[ -n "${SSH_CLIENT}" ]]; then
-        user_info="${USER_INFO_SSH_CHAR}${USER}@${HOSTNAME}"
+        user_info="${USER_INFO_SSH_CHAR}${USER}@${SHORT_HOSTNAME:=$HOSTNAME}"
       else
         user_info="${USER}"
       fi
@@ -91,6 +91,10 @@ function __powerline_scm_prompt {
 
 function __powerline_cwd_prompt {
   echo "$(pwd | sed "s|^${HOME}|~|")|${CWD_THEME_PROMPT_COLOR}"
+}
+
+function __powerline_wd_prompt {
+  echo "\W|${CWD_THEME_PROMPT_COLOR}"
 }
 
 function __powerline_clock_prompt {
