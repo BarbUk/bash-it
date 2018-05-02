@@ -7,6 +7,8 @@ CLOCK_THEME_PROMPT_SUFFIX=''
 
 THEME_PROMPT_HOST='\H'
 
+SCM=
+
 SCM_CHECK=${SCM_CHECK:=true}
 
 SCM_THEME_PROMPT_DIRTY=' ✗'
@@ -64,6 +66,8 @@ THEME_SHOW_USER_HOST=${THEME_SHOW_USER_HOST:=false}
 USER_HOST_THEME_PROMPT_PREFIX=''
 USER_HOST_THEME_PROMPT_SUFFIX=''
 
+VIRTUAL_ENV=
+
 VIRTUALENV_THEME_PROMPT_PREFIX=' |'
 VIRTUALENV_THEME_PROMPT_SUFFIX='|'
 
@@ -75,12 +79,12 @@ RBFU_THEME_PROMPT_SUFFIX='|'
 
 function scm {
   if [[ "$SCM_CHECK" = false ]]; then SCM=$SCM_NONE
-  elif [[ -f .git/HEAD ]]; then SCM=$SCM_GIT
+  elif [[ -f .git/HEAD ]] && which git &> /dev/null; then SCM=$SCM_GIT
   elif which git &> /dev/null && [[ -n "$(git rev-parse --is-inside-work-tree 2> /dev/null)" ]]; then SCM=$SCM_GIT
   elif which p4 &> /dev/null && [[ -n "$(p4 set P4CLIENT 2> /dev/null)" ]]; then SCM=$SCM_P4
-  elif [[ -d .hg ]]; then SCM=$SCM_HG
+  elif [[ -d .hg ]] && which hg &> /dev/null; then SCM=$SCM_HG
   elif which hg &> /dev/null && [[ -n "$(hg root 2> /dev/null)" ]]; then SCM=$SCM_HG
-  elif [[ -d .svn ]]; then SCM=$SCM_SVN
+  elif [[ -d .svn ]] && which svn &> /dev/null; then SCM=$SCM_SVN
   else SCM=$SCM_NONE
   fi
 }
