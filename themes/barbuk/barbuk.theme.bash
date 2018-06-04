@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-SCM_GIT_CHAR="± "
+SCM_GIT_CHAR_GITLAB="  "
+SCM_GIT_CHAR_BITBUCKET="  "
+SCM_GIT_CHAR_GITHUB="  "
+SCM_GIT_CHAR_ICON_BRANCH=""
+SCM_GIT_CHAR_DEFAULT="  "
 SCM_HG_CHAR="☿ "
 SCM_SVN_CHAR="⑆ "
 SCM_NONE_CHAR=""
@@ -32,29 +36,40 @@ RBENV_THEME_PROMPT_SUFFIX="| "
 RBFU_THEME_PROMPT_PREFIX="|"
 RBFU_THEME_PROMPT_SUFFIX="| "
 
-icon_branch=""
+
+function git-remote-origin-url {
+    remote=$(git config --get remote.origin.url | awk -F'[@:.]' '{print $2}')
+    case $remote in
+        github ) echo "$SCM_GIT_CHAR_GITHUB";;
+        gitlab ) echo "$SCM_GIT_CHAR_GITLAB";;
+        bitbucket ) echo "$SCM_GIT_CHAR_BITBUCKET";;
+        * ) echo "$SCM_GIT_CHAR_DEFAULT";;
+    esac
+}
 
 function git_prompt_info {
   git_prompt_vars
-  echo -e " on $icon_branch $SCM_PREFIX$SCM_BRANCH$SCM_STATE$SCM_GIT_AHEAD$SCM_GIT_BEHIND$SCM_GIT_STASH$SCM_SUFFIX"
+  echo -e " on $SCM_GIT_CHAR_ICON_BRANCH $SCM_PREFIX$SCM_BRANCH$SCM_STATE$SCM_GIT_AHEAD$SCM_GIT_BEHIND$SCM_GIT_STASH$SCM_SUFFIX"
 }
 
 function iterate_last_status_prompt {
     if [[ "$1" -ne 0 ]]; then
-        LAST_STATUS_PROMPT="\n⚠ ${LAST_STATUS}"
+        LAST_STATUS_PROMPT=" ${yellow}${LAST_STATUS}${normal}${bold_orange}"
     else
-        LAST_STATUS_PROMPT=""
+        LAST_STATUS_PROMPT="${bold_green}"
     fi
 }
 
 function prompt_command() {
     local LAST_STATUS="$?"
     iterate_last_status_prompt LAST_STATUS
-    local new_PS1="${LAST_STATUS_PROMPT}\n ${bold_cyan}$(scm_char)${yellow}${green}\w${normal}$(scm_prompt_info)"
+    SCM_GIT_CHAR=$(git-remote-origin-url)
+    local new_PS1
+    new_PS1="\\n $(scm_char)${yellow}${green}\\w${normal}$(scm_prompt_info)${LAST_STATUS_PROMPT}"
 
     local wrap_char=" "
-    [[ ${#new_PS1} -gt $(($COLUMNS/1)) ]] && wrap_char="\n"
-    PS1="${new_PS1}${green}${wrap_char}❯${reset_color} "
+    [[ ${#new_PS1} -gt $((COLUMNS*2)) ]] && wrap_char="\\n"
+    PS1="${new_PS1}${wrap_char}❯${normal} "
 }
 
 safe_append_prompt_command prompt_command
