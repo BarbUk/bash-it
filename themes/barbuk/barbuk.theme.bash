@@ -65,7 +65,7 @@ function prompt_command() {
     iterate_last_status_prompt LAST_STATUS
     SCM_GIT_CHAR=$(git-remote-origin-url)
     local new_PS1
-    new_PS1="\\n $(scm_char)${yellow}${green}\\w${normal}$(scm_prompt_info)${LAST_STATUS_PROMPT}"
+    new_PS1="\\n ${purple}$(scm_char)${green}\\w${normal}$(scm_prompt_info)${LAST_STATUS_PROMPT}"
 
     local wrap_char=" "
     [[ ${#new_PS1} -gt $((COLUMNS*2)) ]] && wrap_char="\\n"
