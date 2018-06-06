@@ -54,7 +54,7 @@ function git_prompt_info {
 
 function iterate_last_status_prompt {
     if [[ "$1" -ne 0 ]]; then
-        LAST_STATUS_PROMPT=" ${yellow}${LAST_STATUS}${normal}${bold_orange}"
+        LAST_STATUS_PROMPT=" ${yellow}${LAST_STATUS}${normal}${bold_orange}"
     else
         LAST_STATUS_PROMPT="${bold_green}"
     fi
@@ -64,6 +64,9 @@ function prompt_command() {
     local LAST_STATUS="$?"
     iterate_last_status_prompt LAST_STATUS
     SCM_GIT_CHAR=$(git-remote-origin-url)
+
+    history -a
+
     local new_PS1
     new_PS1="\\n ${purple}$(scm_char)${green}\\w${normal}$(scm_prompt_info)${LAST_STATUS_PROMPT}"
 
