@@ -27,7 +27,7 @@ SCM_THEME_CURRENT_USER_PREFFIX='  '
 SCM_GIT_SHOW_CURRENT_USER=false
 EXIT_CODE_ICON=' '
 
-function _git_remote_uptream_logo {
+function _git-uptream-remote-logo {
     [[ "$(_git-upstream)" == "" ]] && return
 
     local remote remote_domain
@@ -47,27 +47,26 @@ function git_prompt_info {
     echo -e " on $SCM_GIT_CHAR_ICON_BRANCH $SCM_PREFIX$SCM_BRANCH$SCM_STATE$SCM_GIT_AHEAD$SCM_GIT_BEHIND$SCM_GIT_STASH$SCM_SUFFIX"
 }
 
-function _last_status_prompt {
+function _exit-code {
     if [[ "$1" -ne 0 ]]; then
-        exit_code_prompt=" ${purple}${EXIT_CODE_ICON}${yellow}${exit_code}${bold_orange}"
+        exit_code=" ${purple}${EXIT_CODE_ICON}${yellow}${exit_code}${bold_orange}"
     else
-        exit_code_prompt="${bold_green}"
+        exit_code="${bold_green}"
     fi
 }
 
-function prompt_command() {
-    local exit_code="$?"
-    _last_status_prompt exit_code
-    _git_remote_uptream_logo
+function _prompt {
+    local exit_code="$?" wrap_char=' '
+
+    _exit-code exit_code
+    _git-uptream-remote-logo
 
     history -a
 
-    local new_PS1
-    new_PS1="\\n ${purple}$(scm_char)${green}\\w${normal}$(scm_prompt_info)${exit_code_prompt}"
+    PS1="\\n ${purple}$(scm_char)${green}\\w${normal}$(scm_prompt_info)${exit_code}"
 
-    local wrap_char=" "
-    [[ ${#new_PS1} -gt $((COLUMNS*2)) ]] && wrap_char="\\n"
-    PS1="${new_PS1}${wrap_char}❯${normal} "
+    [[ ${#PS1} -gt $((COLUMNS*2)) ]] && wrap_char="\\n"
+    PS1="${PS1}${wrap_char}❯${normal} "
 }
 
-safe_append_prompt_command prompt_command
+safe_append_prompt_command _prompt
