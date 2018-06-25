@@ -25,7 +25,7 @@ GIT_THEME_PROMPT_SUFFIX="${cyan}"
 SCM_THEME_BRANCH_TRACK_PREFIX="${normal} ⤏  ${cyan}"
 SCM_THEME_CURRENT_USER_PREFFIX='  '
 SCM_GIT_SHOW_CURRENT_USER=false
-EXIT_CODE_ICON=''
+EXIT_CODE_ICON=' '
 
 function _git_remote_uptream_logo {
     [[ "$(_git-upstream)" == "" ]] && return
