@@ -29,7 +29,7 @@ function git_prompt_info {
 
 function prompt_command() {
     local ret_status="$( [ $? -eq 0 ] && echo -e "$STATUS_THEME_PROMPT_OK" || echo -e "$STATUS_THEME_PROMPT_BAD")"
-    PS1="\n${bold_blue}\u${bold_orange} in ${orange}\w $(scm_prompt_info)\n${ret_status}"
+    PS1="\n${bold_blue}\u${bold_orange}@${cyan}\H ${bold_orange}in ${orange}\w $(scm_prompt_info)\n${ret_status}"
 }
 
 safe_append_prompt_command prompt_command
