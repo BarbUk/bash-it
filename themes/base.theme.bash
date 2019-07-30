@@ -39,6 +39,7 @@ SCM_GIT_CHAR='±'
 SCM_GIT_DETACHED_CHAR='⌿'
 SCM_GIT_AHEAD_CHAR="↑"
 SCM_GIT_BEHIND_CHAR="↓"
+SCM_GIT_AHEAD_BEHIND_PREFIX_CHAR=" "
 SCM_GIT_UNTRACKED_CHAR="?:"
 SCM_GIT_UNSTAGED_CHAR="U:"
 SCM_GIT_STAGED_CHAR="S:"
@@ -78,14 +79,20 @@ RBENV_THEME_PROMPT_SUFFIX='|'
 RBFU_THEME_PROMPT_PREFIX=' |'
 RBFU_THEME_PROMPT_SUFFIX='|'
 
+GIT_EXE=`which git 2> /dev/null || true`
+P4_EXE=`which p4 2> /dev/null || true`
+HG_EXE=`which hg  2> /dev/null || true`
+SVN_EXE=`which svn  2> /dev/null || true`
+
 function scm {
   if [[ "$SCM_CHECK" = false ]]; then SCM=$SCM_NONE
-  elif [[ -f .git/HEAD ]] && which git &> /dev/null; then SCM=$SCM_GIT
-  elif which git &> /dev/null && [[ -n "$(git rev-parse --is-inside-work-tree 2> /dev/null)" ]]; then SCM=$SCM_GIT
-  elif which p4 &> /dev/null && [[ -n "$(p4 set P4CLIENT 2> /dev/null)" ]]; then SCM=$SCM_P4
-  elif [[ -d .hg ]] && which hg &> /dev/null; then SCM=$SCM_HG
-  elif which hg &> /dev/null && [[ -n "$(hg root 2> /dev/null)" ]]; then SCM=$SCM_HG
-  elif [[ -d .svn ]] && which svn &> /dev/null; then SCM=$SCM_SVN
+  elif [[ -f .git/HEAD ]] && [[ -x "$GIT_EXE" ]]; then SCM=$SCM_GIT
+  elif [[ -x "$GIT_EXE" ]] && [[ -n "$(git rev-parse --is-inside-work-tree 2> /dev/null)" ]]; then SCM=$SCM_GIT
+  elif [[ -x "$P4_EXE" ]] && [[ -n "$(p4 set P4CLIENT 2> /dev/null)" ]]; then SCM=$SCM_P4
+  elif [[ -d .hg ]] && [[ -x "$HG_EXE" ]]; then SCM=$SCM_HG
+  elif [[ -x "$HG_EXE" ]] && [[ -n "$(hg root 2> /dev/null)" ]]; then SCM=$SCM_HG
+  elif [[ -d .svn ]] && [[ -x "$SVN_EXE" ]]; then SCM=$SCM_SVN
+  elif [[ -x "$SVN_EXE" ]] && [[ -n "$(svn info --show-item wc-root 2>/dev/null)" ]]; then SCM=$SCM_SVN
   else SCM=$SCM_NONE
   fi
 }
@@ -179,8 +186,8 @@ function git_prompt_vars {
   fi
 
   IFS=$'\t' read -r commits_behind commits_ahead <<< "$(_git-upstream-behind-ahead)"
-  [[ "${commits_ahead}" -gt 0 ]] && SCM_BRANCH+=" ${SCM_GIT_AHEAD_CHAR}${commits_ahead}"
-  [[ "${commits_behind}" -gt 0 ]] && SCM_BRANCH+=" ${SCM_GIT_BEHIND_CHAR}${commits_behind}"
+  [[ "${commits_ahead}" -gt 0 ]] && SCM_BRANCH+="${SCM_GIT_AHEAD_BEHIND_PREFIX_CHAR}${SCM_GIT_AHEAD_CHAR}${commits_ahead}"
+  [[ "${commits_behind}" -gt 0 ]] && SCM_BRANCH+="${SCM_GIT_AHEAD_BEHIND_PREFIX_CHAR}${SCM_GIT_BEHIND_CHAR}${commits_behind}"
 
   if [[ "${SCM_GIT_SHOW_STASH_INFO}" = "true" ]]; then
     local stash_count
@@ -231,7 +238,7 @@ function p4_prompt_vars {
 }
 
 function svn_prompt_vars {
-  if [[ -n $(svn status 2> /dev/null) ]]; then
+  if [[ -n $(svn status |head -c1 2> /dev/null) ]]; then
     SCM_DIRTY=1
     SCM_STATE=${SVN_THEME_PROMPT_DIRTY:-$SCM_THEME_PROMPT_DIRTY}
   else
@@ -240,8 +247,8 @@ function svn_prompt_vars {
   fi
   SCM_PREFIX=${SVN_THEME_PROMPT_PREFIX:-$SCM_THEME_PROMPT_PREFIX}
   SCM_SUFFIX=${SVN_THEME_PROMPT_SUFFIX:-$SCM_THEME_PROMPT_SUFFIX}
-  SCM_BRANCH=$(svn info 2> /dev/null | awk -F/ '/^URL:/ { for (i=0; i<=NF; i++) { if ($i == "branches" || $i == "tags" ) { print $(i+1); break }; if ($i == "trunk") { print $i; break } } }') || return
-  SCM_CHANGE=$(svn info 2> /dev/null | sed -ne 's#^Revision: ##p' )
+  SCM_BRANCH=$(svn info --show-item=url 2> /dev/null | awk -F/ '{ for (i=0; i<=NF; i++) { if ($i == "branches" || $i == "tags" ) { print $(i+1); break }; if ($i == "trunk") { print $i; break } } }') || return
+  SCM_CHANGE=$(svn info --show-item=revision 2> /dev/null)
 }
 
 # this functions returns absolute location of .hg directory if one exists
@@ -496,4 +503,9 @@ function safe_append_prompt_command {
           PROMPT_COMMAND="${1};${PROMPT_COMMAND}"
         fi
     fi
+}
+
+function _save-and-reload-history() {
+  local autosave=${1:-0}
+  [[ $autosave -eq 1 ]] && history -a && history -c && history -r
 }
