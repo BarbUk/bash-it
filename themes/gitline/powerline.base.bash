@@ -1,6 +1,7 @@
-# Define this here so it can be used by all of the Powerline themes
+# Sudo check after every command
 THEME_CHECK_SUDO=${THEME_CHECK_SUDO:=true}
 
+#To set color for foreground and background
 function set_color {
   set +u
   if [[ "${1}" != "-" ]]; then
@@ -13,9 +14,11 @@ function set_color {
   echo -e "\[\033[${fg}${bg}m\]"
 }
 
+#Customising User Info Segment
 function __powerline_user_info_prompt {
-  local user_info=""
+  local user_info="${USER}"
   local color=${USER_INFO_THEME_PROMPT_COLOR}
+  local fg_color=15
 
   if [[ "${THEME_CHECK_SUDO}" = true ]]; then
     if sudo -n uptime 2>&1 | grep -q "load"; then
@@ -26,7 +29,9 @@ function __powerline_user_info_prompt {
   case "${POWERLINE_PROMPT_USER_INFO_MODE}" in
     "sudo")
       if [[ "${color}" = "${USER_INFO_THEME_PROMPT_COLOR_SUDO}" ]]; then
-        user_info="!"
+        user_info="👑 ${USER}"
+        fg_color=227
+        color=${USER_INFO_THEME_PROMPT_COLOR_SUDO}
       fi
       ;;
     *)
@@ -37,18 +42,13 @@ function __powerline_user_info_prompt {
       fi
       ;;
   esac
-  [[ -n "${user_info}" ]] && echo "${user_info}|${color}"
+  [[ -n "${user_info}" ]] && echo "${user_info}|${color}|${fg_color}"
 }
 
-function __powerline_node_prompt {
-  local node_version=""
-
-  node_version="$(node_version_prompt)"
-  [[ -n "${node_version}" ]] && echo "${NODE_CHAR}${node_version}|${NODE_THEME_PROMPT_COLOR}"
-}
-
+#Customising Ruby Prompt
 function __powerline_ruby_prompt {
   local ruby_version=""
+  local fg_color=206
 
   if _command_exists rvm; then
     ruby_version="$(rvm_version_prompt)"
@@ -56,22 +56,14 @@ function __powerline_ruby_prompt {
     ruby_version=$(rbenv_version_prompt)
   fi
 
-  [[ -n "${ruby_version}" ]] && echo "${RUBY_CHAR}${ruby_version}|${RUBY_THEME_PROMPT_COLOR}"
+  [[ -n "${ruby_version}" ]] && echo "${RUBY_CHAR}${ruby_version}|${RUBY_THEME_PROMPT_COLOR}|${fg_color}"
 }
 
-function __powerline_k8s_context_prompt {
-  local kubernetes_context=""
-
-  if _command_exists kubectl; then
-    kubernetes_context="$(k8s_context_prompt)"
-  fi
-
-  [[ -n "${kubernetes_context}" ]] && echo "${KUBERNETES_CONTEXT_THEME_CHAR}${kubernetes_context}|${KUBERNETES_CONTEXT_THEME_PROMPT_COLOR}"
-}
-
+#Customising Python (venv) Prompt
 function __powerline_python_venv_prompt {
   set +u
   local python_venv=""
+  local fg_color=206
 
   if [[ -n "${CONDA_DEFAULT_ENV}" ]]; then
     python_venv="${CONDA_DEFAULT_ENV}"
@@ -80,24 +72,34 @@ function __powerline_python_venv_prompt {
     python_venv=$(basename "${VIRTUAL_ENV}")
   fi
 
-  [[ -n "${python_venv}" ]] && echo "${PYTHON_VENV_CHAR}${python_venv}|${PYTHON_VENV_THEME_PROMPT_COLOR}"
+  [[ -n "${python_venv}" ]] && echo "${PYTHON_VENV_CHAR}${python_venv}|${PYTHON_VENV_THEME_PROMPT_COLOR}|${fg_color}"
 }
 
+#Customising SCM(GIT) Prompt
 function __powerline_scm_prompt {
   local color=""
   local scm_prompt=""
+  local fg_color=206
 
   scm_prompt_vars
+
 
   if [[ "${SCM_NONE_CHAR}" != "${SCM_CHAR}" ]]; then
     if [[ "${SCM_DIRTY}" -eq 3 ]]; then
       color=${SCM_THEME_PROMPT_STAGED_COLOR}
+      fg_color=124
     elif [[ "${SCM_DIRTY}" -eq 2 ]]; then
       color=${SCM_THEME_PROMPT_UNSTAGED_COLOR}
+      fg_color=56
     elif [[ "${SCM_DIRTY}" -eq 1 ]]; then
       color=${SCM_THEME_PROMPT_DIRTY_COLOR}
-    else
+      fg_color=118
+    elif [[ "${SCM_DIRTY}" -eq 0 ]]; then
       color=${SCM_THEME_PROMPT_CLEAN_COLOR}
+      fg_color=16
+    else
+      color=${SCM_THEME_PROMPT_COLOR}
+      fg_color=255
     fi
     if [[ "${SCM_GIT_CHAR}" == "${SCM_CHAR}" ]]; then
       scm_prompt+="${SCM_CHAR}${SCM_BRANCH}${SCM_STATE}"
@@ -105,34 +107,40 @@ function __powerline_scm_prompt {
       scm_prompt+="${SCM_CHAR}${SCM_BRANCH}${SCM_STATE}"
     elif [[ "${SCM_HG_CHAR}" == "${SCM_CHAR}" ]]; then
       scm_prompt+="${SCM_CHAR}${SCM_BRANCH}${SCM_STATE}"
-    elif [[ "${SCM_SVN_CHAR}" == "${SCM_CHAR}" ]]; then
-      scm_prompt+="${SCM_CHAR}${SCM_BRANCH}${SCM_STATE}"
     fi
-    echo "$(eval "echo ${scm_prompt}")${scm}|${color}"
+    echo "${scm_prompt}${scm}|${color}|${fg_color}"
   fi
 }
 
 function __powerline_cwd_prompt {
   local cwd=$(pwd | sed "s|^${HOME}|~|")
+  local fg_color=16
 
-  echo "${cwd}|${CWD_THEME_PROMPT_COLOR}"
+  echo "${cwd}|${CWD_THEME_PROMPT_COLOR}|${fg_color}"
 }
 
 function __powerline_hostname_prompt {
-    echo "$(hostname -s)|${HOST_THEME_PROMPT_COLOR}"
+    local fg_color=206
+
+    echo "$(hostname -s)|${HOST_THEME_PROMPT_COLOR}|${fg_color}"
 }
 
 function __powerline_wd_prompt {
-  echo "\W|${CWD_THEME_PROMPT_COLOR}"
+    local fg_color=206
+
+  echo "\W|${CWD_THEME_PROMPT_COLOR}|${fg_color}"
 }
 
 function __powerline_clock_prompt {
-  echo "$(date +"${THEME_CLOCK_FORMAT}")|${CLOCK_THEME_PROMPT_COLOR}"
+    local fg_color=206
+
+  echo "$(date +"${THEME_CLOCK_FORMAT}")|${CLOCK_THEME_PROMPT_COLOR}|${fg_color}"
 }
 
 function __powerline_battery_prompt {
   local color=""
   local battery_status="$(battery_percentage 2> /dev/null)"
+  local fg_color=255
 
   if [[ -z "${battery_status}" ]] || [[ "${battery_status}" = "-1" ]] || [[ "${battery_status}" = "no" ]]; then
     true
@@ -145,19 +153,23 @@ function __powerline_battery_prompt {
       color="${BATTERY_STATUS_THEME_PROMPT_GOOD_COLOR}"
     fi
     ac_adapter_connected && battery_status="${BATTERY_AC_CHAR}${battery_status}"
-    echo "${battery_status}%|${color}"
+    echo "${battery_status}%|${color}|${fg_color}"
   fi
 }
 
 function __powerline_in_vim_prompt {
+    local fg_color=206
+
   if [ -n "$VIMRUNTIME" ]; then
-    echo "${IN_VIM_THEME_PROMPT_TEXT}|${IN_VIM_THEME_PROMPT_COLOR}"
+    echo "${IN_VIM_THEME_PROMPT_TEXT}|${IN_VIM_THEME_PROMPT_COLOR}|${fg_color}"
   fi
 }
 
 function __powerline_aws_profile_prompt {
+    local fg_color=206
+
   if [[ -n "${AWS_PROFILE}" ]]; then
-    echo "${AWS_PROFILE_CHAR}${AWS_PROFILE}|${AWS_PROFILE_PROMPT_COLOR}"
+    echo "${AWS_PROFILE_CHAR}${AWS_PROFILE}|${AWS_PROFILE_PROMPT_COLOR}|${fg_color}"
   fi
 }
 
@@ -167,11 +179,15 @@ function __powerline_left_segment {
   IFS="${OLD_IFS}"
   local separator_char="${POWERLINE_LEFT_SEPARATOR}"
   local separator=""
+  local fg_color=206
 
+  #for seperator character
   if [[ "${SEGMENTS_AT_LEFT}" -gt 0 ]]; then
     separator="$(set_color ${LAST_SEGMENT_COLOR} ${params[1]})${separator_char}${normal}"
   fi
-  LEFT_PROMPT+="${separator}$(set_color - ${params[1]}) ${params[0]} ${normal}"
+  #change here to cahnge fg color
+  LEFT_PROMPT+="${separator}$(set_color ${params[2]} ${params[1]}) ${params[0]} ${normal}"
+  #seperator char color = current bg
   LAST_SEGMENT_COLOR=${params[1]}
   (( SEGMENTS_AT_LEFT += 1 ))
 }
