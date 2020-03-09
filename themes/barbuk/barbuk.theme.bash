@@ -34,6 +34,9 @@ function _git-uptream-remote-logo {
     remote=$(_git-upstream-remote)
     remote_domain=$(git config --get remote."$remote".url | awk -F'[@:.]' '{print $2}')
 
+    # remove // suffix for https:// url
+    remote_domain=${remote_domain//\//}
+
     case $remote_domain in
         github ) SCM_GIT_CHAR="$SCM_GIT_CHAR_GITHUB";;
         gitlab ) SCM_GIT_CHAR="$SCM_GIT_CHAR_GITLAB";;
@@ -56,16 +59,21 @@ function _exit-code {
 }
 
 function _prompt {
-    local exit_code="$?" wrap_char=' '
+    local exit_code="$?" wrap_char=' ' dir_color=$green
 
     _exit-code exit_code
     _git-uptream-remote-logo
 
     history -a
 
-    PS1="\\n ${purple}$(scm_char)${green}\\w${normal}$(scm_prompt_info)${exit_code}"
+    # Detect root shell
+    if [ "$(whoami)" = root ]; then
+        dir_color=$red
+    fi
 
-    [[ ${#PS1} -gt $((COLUMNS*2)) ]] && wrap_char="\\n"
+    PS1="\\n ${purple}$(scm_char)${dir_color}\\w${normal}$(scm_prompt_info)${exit_code}"
+
+    [[ ${#PS1} -gt $((COLUMNS*3)) ]] && wrap_char="\\n"
     PS1="${PS1}${wrap_char}❯${normal} "
 }
 
