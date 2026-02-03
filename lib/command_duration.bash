@@ -6,7 +6,7 @@
 function _command_duration_current_time() {
 	local current_time
 	if [[ -n "${EPOCHREALTIME:-}" ]]; then
-		current_time="${EPOCHREALTIME//,/.}"
+		current_time="${EPOCHREALTIME//[!0-9]/.}"
 	else
 		current_time="$SECONDS"
 	fi
