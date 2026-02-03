@@ -14,12 +14,13 @@ function _command_duration_current_time() {
 	echo "$current_time"
 }
 
+: "${COMMAND_DURATION_START_SECONDS:=$(_command_duration_current_time)}"
+: "${COMMAND_DURATION_ICON:=🕘}"
+: "${COMMAND_DURATION_MIN_SECONDS:=1}"
+
 function _command_duration_pre_exec() {
 	COMMAND_DURATION_START_SECONDS="$(_command_duration_current_time)"
 }
-
-: "${COMMAND_DURATION_ICON:=🕘}"
-: "${COMMAND_DURATION_MIN_SECONDS:=1}"
 
 function _command_duration_pre_cmd() {
 	COMMAND_DURATION_START_SECONDS=""
