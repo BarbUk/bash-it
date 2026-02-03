@@ -63,7 +63,10 @@ function _command_duration() {
 		fi
 	fi
 
-	if ((command_duration < 0)); then command_duration=0; deciseconds=0; fi
+	if ((command_duration < 0)); then
+		command_duration=0
+		deciseconds=0
+	fi
 
 	if ((command_duration >= COMMAND_DURATION_MIN_SECONDS)); then
 		minutes=$((command_duration / 60))
