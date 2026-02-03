@@ -3,24 +3,16 @@
 # Functions for measuring and reporting how long a command takes to run.
 
 # Get shell duration in decimal format regardless of runtime locale.
-# Notice: This function runs as a sub-shell - notice '(' vs '{'.
-function _shell_duration_en() (
-	# DFARREL You would think LC_NUMERIC would do it, but not working in my local.
-	# Note: LC_ALL='en_US.UTF-8' has been used to enforce the decimal point to be
-	# a period, but the specific locale 'en_US.UTF-8' is not ensured to exist in
-	# the system.  One should instead use the locale 'C', which is ensured by the
-	# C and POSIX standards.
-	local LC_ALL=C
-	printf "%s" "${EPOCHREALTIME:-$SECONDS}"
-)
+function _command_duration_pre_exec() {
+	if [[ -n "${EPOCHREALTIME:-}" ]]; then
+		COMMAND_DURATION_START_SECONDS="${EPOCHREALTIME//,/.}"
+	else
+		COMMAND_DURATION_START_SECONDS="$SECONDS"
+	fi
+}
 
-: "${COMMAND_DURATION_START_SECONDS:=$(_shell_duration_en)}"
 : "${COMMAND_DURATION_ICON:=🕘}"
 : "${COMMAND_DURATION_MIN_SECONDS:=1}"
-
-function _command_duration_pre_exec() {
-	COMMAND_DURATION_START_SECONDS="$(_shell_duration_en)"
-}
 
 function _command_duration_pre_cmd() {
 	COMMAND_DURATION_START_SECONDS=""
@@ -38,30 +30,40 @@ function _command_duration() {
 	[[ -n "${BASH_IT_COMMAND_DURATION:-}" ]] || return
 	[[ -n "${COMMAND_DURATION_START_SECONDS:-}" ]] || return
 
-	local command_duration=0 command_start="${COMMAND_DURATION_START_SECONDS:-0}"
-	local -i minutes=0 seconds=0 deciseconds=0
-	local -i command_start_seconds="${command_start%.*}"
-	local -i command_start_deciseconds=$((10#${command_start##*.}))
-	command_start_deciseconds="${command_start_deciseconds:0:1}"
 	local current_time
-	current_time="$(_shell_duration_en)"
-	local -i current_time_seconds="${current_time%.*}"
-	local -i current_time_deciseconds="$((10#${current_time##*.}))"
-	current_time_deciseconds="${current_time_deciseconds:0:1}"
+	if [[ -n "${EPOCHREALTIME:-}" ]]; then
+		current_time="${EPOCHREALTIME//,/.}"
+	else
+		current_time="$SECONDS"
+	fi
 
-	if [[ "${command_start_seconds:-0}" -gt 0 ]]; then
-		# seconds
-		command_duration="$((current_time_seconds - command_start_seconds))"
+	local -i command_duration=0
+	local -i minutes=0 seconds=0 deciseconds=0
 
-		if ((current_time_deciseconds >= command_start_deciseconds)); then
-			deciseconds="$((current_time_deciseconds - command_start_deciseconds))"
+	local -i start_s=${COMMAND_DURATION_START_SECONDS%.*}
+	local -i curr_s=${current_time%.*}
+
+	# Calculate seconds difference
+	command_duration=$((curr_s - start_s))
+
+	# Calculate deciseconds if both timestamps have fractional parts
+	if [[ "$COMMAND_DURATION_START_SECONDS" == *.* ]] && [[ "$current_time" == *.* ]]; then
+		local start_fs="${COMMAND_DURATION_START_SECONDS#*.}"
+		local curr_fs="${current_time#*.}"
+
+		# Take first digit for deciseconds
+		local -i start_ds="${start_fs:0:1}"
+		local -i curr_ds="${curr_fs:0:1}"
+
+		if ((curr_ds >= start_ds)); then
+			deciseconds=$((curr_ds - start_ds))
 		else
 			((command_duration -= 1))
-			deciseconds="$((10 - (command_start_deciseconds - current_time_deciseconds)))"
+			deciseconds=$((10 + curr_ds - start_ds))
 		fi
-	else
-		command_duration=0
 	fi
+
+	if ((command_duration < 0)); then command_duration=0; deciseconds=0; fi
 
 	if ((command_duration >= COMMAND_DURATION_MIN_SECONDS)); then
 		minutes=$((command_duration / 60))
