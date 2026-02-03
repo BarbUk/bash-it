@@ -6,7 +6,11 @@ url "https://github.com/Bash-it/bash-it"
 function precmd_return_notification() {
 	local command_start="${COMMAND_DURATION_START_SECONDS:=0}"
 	local current_time
-	current_time="$(_shell_duration_en)"
+	if [[ -n "${EPOCHREALTIME:-}" ]]; then
+		current_time="${EPOCHREALTIME//,/.}"
+	else
+		current_time="$SECONDS"
+	fi
 	local -i command_duration="$((${current_time%.*} - ${command_start%.*}))"
 	if [[ "${command_duration}" -gt "${NOTIFY_IF_COMMAND_RETURNS_AFTER:-5}" ]]; then
 		printf '\a'
