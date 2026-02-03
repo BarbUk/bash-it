@@ -41,7 +41,7 @@ return_exit_code() {
 }
 
 set_exit_code_and_run_precmd() {
-  return_exit_code ${1:-0}
+  return_exit_code "${1:-0}"
   __bp_precmd_invoke_cmd
 }
 
