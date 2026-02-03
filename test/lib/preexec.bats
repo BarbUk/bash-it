@@ -60,7 +60,7 @@ function local_setup {
 	assert_success
 
 	__bp_install
-	assert_equal "${PROMPT_COMMAND}" $'__bp_precmd_invoke_cmd\n__bp_interactive_mode'
+	assert_equal "${PROMPT_COMMAND[*]}" $'__bp_precmd_invoke_cmd __bp_interactive_mode'
 }
 
 @test "vendor preexec: __bp_install() with existing" {
@@ -75,7 +75,7 @@ function local_setup {
 	assert_success
 
 	__bp_install
-	assert_equal "${PROMPT_COMMAND}" $'__bp_precmd_invoke_cmd\n'"$test_prompt_string"$'\n__bp_interactive_mode'
+	assert_equal "${PROMPT_COMMAND[*]}" $'__bp_precmd_invoke_cmd\n'"$test_prompt_string"$'\n: __bp_interactive_mode'
 }
 
 @test "lib preexec: __bp_require_not_readonly()" {
