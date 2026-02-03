@@ -3,12 +3,19 @@
 # Functions for measuring and reporting how long a command takes to run.
 
 # Get shell duration in decimal format regardless of runtime locale.
-function _command_duration_pre_exec() {
+function _command_duration_current_time() {
+	local current_time
 	if [[ -n "${EPOCHREALTIME:-}" ]]; then
-		COMMAND_DURATION_START_SECONDS="${EPOCHREALTIME//,/.}"
+		current_time="${EPOCHREALTIME//,/.}"
 	else
-		COMMAND_DURATION_START_SECONDS="$SECONDS"
+		current_time="$SECONDS"
 	fi
+
+	echo "$current_time"
+}
+
+function _command_duration_pre_exec() {
+	COMMAND_DURATION_START_SECONDS="$(_command_duration_current_time)"
 }
 
 : "${COMMAND_DURATION_ICON:=🕘}"
@@ -19,10 +26,16 @@ function _command_duration_pre_cmd() {
 }
 
 function _dynamic_clock_icon {
-	local clock_hand
+	local clock_hand duration="$1"
+
+	# Clock only work for time >= 1s
+	if ((duration < 1)); then
+		duration=1
+	fi
+
 	# clock hand value is between 90 and 9b in hexadecimal.
 	# so between 144 and 155 in base 10.
-	printf -v clock_hand '%x' $((((${1:-${SECONDS}} - 1) % 12) + 144))
+	printf -v clock_hand '%x' $((((${duration:-${SECONDS}} - 1) % 12) + 144))
 	printf -v 'COMMAND_DURATION_ICON' '%b' "\xf0\x9f\x95\x$clock_hand"
 }
 
@@ -31,35 +44,31 @@ function _command_duration() {
 	[[ -n "${COMMAND_DURATION_START_SECONDS:-}" ]] || return
 
 	local current_time
-	if [[ -n "${EPOCHREALTIME:-}" ]]; then
-		current_time="${EPOCHREALTIME//,/.}"
-	else
-		current_time="$SECONDS"
-	fi
+	current_time="$(_command_duration_current_time)"
 
 	local -i command_duration=0
 	local -i minutes=0 seconds=0 deciseconds=0
 
-	local -i start_s=${COMMAND_DURATION_START_SECONDS%.*}
-	local -i curr_s=${current_time%.*}
+	local -i command_start_seconds=${COMMAND_DURATION_START_SECONDS%.*}
+	local -i current_time_seconds=${current_time%.*}
 
 	# Calculate seconds difference
-	command_duration=$((curr_s - start_s))
+	command_duration=$((current_time_seconds - command_start_seconds))
 
 	# Calculate deciseconds if both timestamps have fractional parts
 	if [[ "$COMMAND_DURATION_START_SECONDS" == *.* ]] && [[ "$current_time" == *.* ]]; then
-		local start_fs="${COMMAND_DURATION_START_SECONDS#*.}"
-		local curr_fs="${current_time#*.}"
+		local -i command_start_deciseconds=$((10#${COMMAND_DURATION_START_SECONDS##*.}))
+		local -i current_time_deciseconds="$((10#${current_time##*.}))"
 
 		# Take first digit for deciseconds
-		local -i start_ds="${start_fs:0:1}"
-		local -i curr_ds="${curr_fs:0:1}"
+		command_start_deciseconds="${command_start_deciseconds:0:1}"
+		current_time_deciseconds="${current_time_deciseconds:0:1}"
 
-		if ((curr_ds >= start_ds)); then
-			deciseconds=$((curr_ds - start_ds))
+		if ((current_time_deciseconds >= command_start_deciseconds)); then
+			deciseconds=$((current_time_deciseconds - command_start_deciseconds))
 		else
 			((command_duration -= 1))
-			deciseconds=$((10 + curr_ds - start_ds))
+			deciseconds=$((10 + current_time_deciseconds - command_start_deciseconds))
 		fi
 	fi
 
