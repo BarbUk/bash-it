@@ -76,6 +76,7 @@ set_exit_code_and_run_precmd() {
 
   # Assert that before running, the command contains the install string, and
   # afterwards it does not
+  # shellcheck disable=SC2154
   [[ "$PROMPT_COMMAND" == *"$__bp_install_string"* ]] || return 1
 
   eval_PROMPT_COMMAND

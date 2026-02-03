@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 @test "should not import if it's already defined" {
+	# shellcheck disable=SC2034
   bash_preexec_imported="defined"
   source "${BATS_TEST_DIRNAME}/../bash-preexec.sh"
   [ -z "$(type -t __bp_install)" ]
