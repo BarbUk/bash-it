@@ -10,6 +10,7 @@ SCM_GIT_CHAR_GITLAB=${BARBUK_GITLAB_CHAR:='  '}
 SCM_GIT_CHAR_BITBUCKET=${BARBUK_BITBUCKET_CHAR:='  '}
 SCM_GIT_CHAR_GITHUB=${BARBUK_GITHUB_CHAR:='  '}
 SCM_GIT_CHAR_ARCHLINUX=${BARBUK_ARCHLINUX_CHAR:='  '}
+SCM_GIT_CHAR_CODEBERG=${BARBUK_CODEBERG_CHAR:='  '}
 SCM_GIT_CHAR_DEFAULT=${BARBUK_GIT_DEFAULT_CHAR:='  '}
 SCM_GIT_CHAR_ICON_BRANCH=${BARBUK_GIT_BRANCH_ICON:=''}
 SCM_HG_CHAR=${BARBUK_HG_CHAR:='☿ '}
@@ -64,18 +65,30 @@ RBENV_THEME_PROMPT_SUFFIX=''
 RBFU_THEME_PROMPT_PREFIX=''
 RBFU_THEME_PROMPT_SUFFIX=''
 
+function __get_domain_from_git_remote() {
+	local git_remote="$1"
+	echo "$git_remote" | awk -F'[@:]' '$1 ~ /ssh/ {domain=$3} $1 ~ /https/ {domain=$2} $1 ~ /git/ {domain=$2} { sub("//", "", domain); sub(/\/.*$/, "", domain); print domain }'
+}
+
 function __git-upstream-remote-logo_prompt() {
 	[[ -z "$(_git-upstream)" ]] && SCM_GIT_CHAR="${SCM_GIT_CHAR_DEFAULT:-}"
 
 	local remote remote_domain
 	remote="$(_git-upstream-remote)"
-	remote_domain=$(git config --get remote."${remote}".url \
-		| awk -F'[@:]' '$1 ~ /ssh/ {domain=$3} $1 ~ /https/ {domain=$2} $1 ~ /git/ {domain=$2} { sub("//", "", domain); sub(/\/.*$/, "", domain); print domain }')
+
+	if [ -z "$remote" ]; then
+		remote=$(git ls-remote --get-url 2> /dev/null)
+	else
+		remote=$(git config --get remote."${remote}".url)
+	fi
+
+	remote_domain=$(__get_domain_from_git_remote "$remote")
 
 	case "${remote_domain}" in
 		github.com) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITHUB:-}" ;;
 		gitlab.com) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITLAB:-}" ;;
 		bitbucket.com) SCM_GIT_CHAR="${SCM_GIT_CHAR_BITBUCKET:-}" ;;
+		codeberg.org) SCM_GIT_CHAR="${SCM_GIT_CHAR_CODEBERG:-}" ;;
 		aur.archlinux.org) SCM_GIT_CHAR="${SCM_GIT_CHAR_ARCHLINUX:-}" ;;
 		*) SCM_GIT_CHAR="${SCM_GIT_CHAR_DEFAULT:-}" ;;
 	esac
