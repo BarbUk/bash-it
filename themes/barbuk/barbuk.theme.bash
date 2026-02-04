@@ -2,13 +2,14 @@
 # shellcheck disable=SC2034 # Expected behavior for themes.
 
 # Prompt defaut configuration
-BARBUK_PROMPT=${BARBUK_PROMPT:="git-uptream-remote-logo ssh path scm python_venv ruby node terraform cloud duration exit"}
+BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv ruby node terraform cloud duration exit"}
 
 # Theme custom glyphs
 # SCM
 SCM_GIT_CHAR_GITLAB=${BARBUK_GITLAB_CHAR:='  '}
 SCM_GIT_CHAR_BITBUCKET=${BARBUK_BITBUCKET_CHAR:='  '}
 SCM_GIT_CHAR_GITHUB=${BARBUK_GITHUB_CHAR:='  '}
+SCM_GIT_CHAR_ARCHLINUX=${BARBUK_ARCHLINUX_CHAR:='  '}
 SCM_GIT_CHAR_DEFAULT=${BARBUK_GIT_DEFAULT_CHAR:='  '}
 SCM_GIT_CHAR_ICON_BRANCH=${BARBUK_GIT_BRANCH_ICON:=''}
 SCM_HG_CHAR=${BARBUK_HG_CHAR:='☿ '}
@@ -59,20 +60,19 @@ RBENV_THEME_PROMPT_SUFFIX=''
 RBFU_THEME_PROMPT_PREFIX=''
 RBFU_THEME_PROMPT_SUFFIX=''
 
-function __git-uptream-remote-logo_prompt() {
+function __git-upstream-remote-logo_prompt() {
 	[[ -z "$(_git-upstream)" ]] && SCM_GIT_CHAR="${SCM_GIT_CHAR_DEFAULT:-}"
 
 	local remote remote_domain
 	remote="$(_git-upstream-remote)"
-	remote_domain="$(git config --get remote."${remote}".url | awk -F'[@:.]' '{print $2}')"
-
-	# remove // suffix for https:// url
-	remote_domain="${remote_domain//\//}"
+	remote_domain=$(git config --get remote."${remote}".url \
+		| awk -F'[@:]' '$1 ~ /ssh/ {domain=$3} $1 ~ /https/ {domain=$2} $1 ~ /git/ {domain=$2} { sub("//", "", domain); sub(/\/.*$/, "", domain); print domain }')
 
 	case "${remote_domain}" in
-		github) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITHUB:-}" ;;
-		gitlab) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITLAB:-}" ;;
-		bitbucket) SCM_GIT_CHAR="${SCM_GIT_CHAR_BITBUCKET:-}" ;;
+		github.com) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITHUB:-}" ;;
+		gitlab.com) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITLAB:-}" ;;
+		bitbucket.com) SCM_GIT_CHAR="${SCM_GIT_CHAR_BITBUCKET:-}" ;;
+		aur.archlinux.org) SCM_GIT_CHAR="${SCM_GIT_CHAR_ARCHLINUX:-}" ;;
 		*) SCM_GIT_CHAR="${SCM_GIT_CHAR_DEFAULT:-}" ;;
 	esac
 
