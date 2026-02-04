@@ -32,6 +32,9 @@ available block:
 * python_venv
 * ruby
 * node
+* uv 
+* bun
+* pre_commit
 * terraform
 * cloud
 * duration
@@ -54,6 +57,8 @@ Default theme glyphs
    BARBUK_GITLAB_CHAR='  '
    BARBUK_BITBUCKET_CHAR='  '
    BARBUK_GITHUB_CHAR='  '
+   BARBUK_ARCHLINUX_CHAR:='  '
+   BARBUK_CODEBERG_CHAR:='  '
    BARBUK_GIT_DEFAULT_CHAR='  '
    BARBUK_GIT_BRANCH_ICON=''
    BARBUK_CURRENT_USER_PREFFIX='  '
