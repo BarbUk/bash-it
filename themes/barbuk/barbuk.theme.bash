@@ -137,6 +137,16 @@ function __node_prompt() {
 	[[ -n "${node_version}" ]] && echo "${bold_purple?}${NODE_CHAR}${normal?}${node_version} "
 }
 
+function __bun_prompt() {
+	if [[ -f bun.lockb || -f bun.lock ]]; then
+		local bun_version=""
+		if _command_exists bun; then
+			bun_version=$(bun --version 2> /dev/null)
+		fi
+		echo "${bold_purple?}${BUN_CHAR}${normal?}${bun_version} "
+	fi
+}
+
 function __ruby_prompt() {
 	local ruby_version=""
 
