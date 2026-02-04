@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034 # Expected behavior for themes.
 
 # Prompt defaut configuration
-BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv ruby node terraform cloud duration exit"}
+BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun pre_commit terraform cloud duration exit"}
 
 # Theme custom glyphs
 # SCM
@@ -18,9 +18,13 @@ SCM_THEME_CURRENT_USER_PREFFIX=${normal?}${BARBUK_CURRENT_USER_PREFFIX:='  '}
 # Exit code
 EXIT_CODE_ICON=${BARBUK_EXIT_CODE_ICON:=' '}
 # Programming and tools
+PRE_COMMIT_CHAR=${BARBUK_PRE_COMMIT_CHAR:=' '}
+PREK_CHAR=${BARBUK_PREK_CHAR:='⚡'}
 PYTHON_VENV_CHAR=${BARBUK_PYTHON_VENV_CHAR:=' '}
+UV_CHAR=${BARBUK_UV_CHAR:='🐍'}
 RUBY_CHAR=${BARBUK_RUBY_CHAR:=' '}
 NODE_CHAR=${BARBUK_NODE_CHAR:=' '}
+BUN_CHAR=${BARBUK_BUN_CHAR:='🍞 '}
 TERRAFORM_CHAR=${BARBUK_TERRAFORM_CHAR:="❲t❳ "}
 # Cloud
 AWS_PROFILE_CHAR=${BARBUK_AWS_PROFILE_CHAR:=" aws "}
@@ -153,11 +157,36 @@ function __ssh_prompt() {
 }
 
 function __python_venv_prompt() {
-	# Detect python venv
+	local python_info=""
 	if [[ -n "${CONDA_DEFAULT_ENV}" ]]; then
-		echo "${bold_purple?}$PYTHON_VENV_CHAR${normal?}${CONDA_DEFAULT_ENV} "
-	elif [[ -n "${VIRTUAL_ENV}" ]]; then
-		echo "${bold_purple?}$PYTHON_VENV_CHAR${normal?}$(basename "${VIRTUAL_ENV}") "
+		python_info="${CONDA_DEFAULT_ENV}"
+	elif [[ -n "${VIRTUAL_ENV_PROMPT}" ]]; then
+		python_info="${VIRTUAL_ENV_PROMPT}"
+	elif [[ -f pyproject.toml ]]; then
+		python_info=$(awk -F'"' '/^requires-python/ {print $2}' pyproject.toml)
+		[[ -z "${python_info}" ]] && python_info="py"
+	fi
+
+	if [[ -n "${python_info}" ]]; then
+		echo "${bold_purple?}$PYTHON_VENV_CHAR${normal?}${python_info} "
+	fi
+}
+
+function __uv_prompt() {
+	if [[ -f uv.lock ]]; then
+		echo "${bold_purple?}${UV_CHAR}${normal?} "
+	fi
+}
+
+function __pre_commit_prompt() {
+	if [[ -f .pre-commit-config.yaml ]]; then
+		local icon="${PRE_COMMIT_CHAR}"
+		if [[ -f .git/hooks/pre-commit ]]; then
+			if grep -q "prek" .git/hooks/pre-commit 2> /dev/null; then
+				icon="${PREK_CHAR}"
+			fi
+		fi
+		echo "${bold_purple?}${icon}${normal?} "
 	fi
 }
 
