@@ -151,7 +151,7 @@ function __node_prompt() {
 }
 
 function __bun_prompt() {
-	if [[ -f bun.lockb || -f bun.lock ]]; then
+	if [[ -f bun.lockb || -f bun.lock || -f bunfig.toml ]]; then
 		local bun_version=""
 		if _command_exists bun; then
 			bun_version=$(bun --version 2> /dev/null)
