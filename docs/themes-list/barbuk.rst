@@ -59,7 +59,7 @@ Default theme glyphs
    BARBUK_GITHUB_CHAR='  '
    BARBUK_ARCHLINUX_CHAR:='  '
    BARBUK_CODEBERG_CHAR:='  '
-   BARBUK_GIT_DEFAULT_CHAR='  '
+   BARBUK_GIT_DEFAULT_CHAR='  '
    BARBUK_GIT_BRANCH_ICON=''
    BARBUK_CURRENT_USER_PREFFIX='  '
    BARBUK_HG_CHAR='☿ '
@@ -161,7 +161,7 @@ Python venv
 
 .. code-block:: bash
 
-     flask ~/test on  master ✓ ❯
+     flask ~/test on  master ✓ ❯
 
 Command duration
 ^^^^^^^^^^^^^^^^
