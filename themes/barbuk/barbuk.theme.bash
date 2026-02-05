@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034 # Expected behavior for themes.
 
 # Prompt defaut configuration
-BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun pre_commit terraform cloud duration exit"}
+BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun docker pre_commit terraform cloud duration exit"}
 
 # Theme custom glyphs
 # SCM
@@ -27,6 +27,7 @@ RUBY_CHAR=${BARBUK_RUBY_CHAR:=' '}
 NODE_CHAR=${BARBUK_NODE_CHAR:=' '}
 BUN_CHAR=${BARBUK_BUN_CHAR:='🍞 '}
 TERRAFORM_CHAR=${BARBUK_TERRAFORM_CHAR:="❲t❳ "}
+DOCKER_CHAR=${BARBUK_DOCKER_CHAR:=" "}
 # Cloud
 AWS_PROFILE_CHAR=${BARBUK_AWS_PROFILE_CHAR:=" aws "}
 SCALEWAY_PROFILE_CHAR=${BARBUK_SCALEWAY_PROFILE_CHAR:=" scw "}
@@ -229,6 +230,19 @@ function __scm_prompt() {
 
 function __duration_prompt() {
 	[[ -n "$command_duration" ]] && echo "${command_duration} "
+}
+
+function __docker_prompt() {
+	local docker_context=''
+
+	if [ -f compose.yml ] || [ -f docker-compose.yml ] || [ -f Dockerfile ]; then
+		if [ -n "$DOCKER_CONTEXT" ]; then
+			docker_context="$DOCKER_CONTEXT"
+		elif [ -n "$DOCKER_HOST" ]; then
+			docker_context="$DOCKER_HOST"
+		fi
+		echo "${bold_blue?}${DOCKER_CHAR}${normal?}${docker_context} "
+	fi
 }
 
 function __prompt-command() {
