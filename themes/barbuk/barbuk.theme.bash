@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034 # Expected behavior for themes.
 
 # Prompt defaut configuration
-BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun pre_commit terraform cloud duration exit"}
+BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun docker pre_commit terraform cloud duration exit"}
 
 # Theme custom glyphs
 # SCM
@@ -11,7 +11,7 @@ SCM_GIT_CHAR_BITBUCKET=${BARBUK_BITBUCKET_CHAR:='  '}
 SCM_GIT_CHAR_GITHUB=${BARBUK_GITHUB_CHAR:='  '}
 SCM_GIT_CHAR_ARCHLINUX=${BARBUK_ARCHLINUX_CHAR:='  '}
 SCM_GIT_CHAR_CODEBERG=${BARBUK_CODEBERG_CHAR:='  '}
-SCM_GIT_CHAR_DEFAULT=${BARBUK_GIT_DEFAULT_CHAR:='  '}
+SCM_GIT_CHAR_DEFAULT=${BARBUK_GIT_DEFAULT_CHAR:='  '}
 SCM_GIT_CHAR_ICON_BRANCH=${BARBUK_GIT_BRANCH_ICON:=''}
 SCM_HG_CHAR=${BARBUK_HG_CHAR:='☿ '}
 SCM_SVN_CHAR=${BARBUK_SVN_CHAR:='⑆ '}
@@ -27,6 +27,7 @@ RUBY_CHAR=${BARBUK_RUBY_CHAR:=' '}
 NODE_CHAR=${BARBUK_NODE_CHAR:=' '}
 BUN_CHAR=${BARBUK_BUN_CHAR:='🍞 '}
 TERRAFORM_CHAR=${BARBUK_TERRAFORM_CHAR:="❲t❳ "}
+DOCKER_CHAR=${BARBUK_DOCKER_CHAR:=" "}
 # Cloud
 AWS_PROFILE_CHAR=${BARBUK_AWS_PROFILE_CHAR:=" aws "}
 SCALEWAY_PROFILE_CHAR=${BARBUK_SCALEWAY_PROFILE_CHAR:=" scw "}
@@ -56,6 +57,7 @@ GIT_THEME_PROMPT_CLEAN=" ${bold_green?}✓"
 GIT_THEME_PROMPT_PREFIX="${cyan?}"
 GIT_THEME_PROMPT_SUFFIX="${cyan?}"
 SCM_THEME_BRANCH_TRACK_PREFIX="${normal?} ⤏  ${cyan?}"
+SCM_THEME_BRANCH_GONE_PREFIX="${normal?} ↛  ${red?}"
 NVM_THEME_PROMPT_PREFIX=''
 NVM_THEME_PROMPT_SUFFIX=''
 RVM_THEME_PROMPT_PREFIX=''
@@ -151,7 +153,7 @@ function __node_prompt() {
 }
 
 function __bun_prompt() {
-	if [[ -f bun.lockb || -f bun.lock ]]; then
+	if [[ -f bun.lockb || -f bun.lock || -f bunfig.toml ]]; then
 		local bun_version=""
 		if _command_exists bun; then
 			bun_version=$(bun --version 2> /dev/null)
@@ -229,6 +231,19 @@ function __scm_prompt() {
 
 function __duration_prompt() {
 	[[ -n "$command_duration" ]] && echo "${command_duration} "
+}
+
+function __docker_prompt() {
+	local docker_context=''
+
+	if [ -f compose.yml ] || [ -f docker-compose.yml ] || [ -f Dockerfile ]; then
+		if [ -n "$DOCKER_CONTEXT" ]; then
+			docker_context="$DOCKER_CONTEXT"
+		elif [ -n "$DOCKER_HOST" ]; then
+			docker_context="$DOCKER_HOST"
+		fi
+		echo "${bold_blue?}${DOCKER_CHAR}${normal?}${docker_context} "
+	fi
 }
 
 function __prompt-command() {
