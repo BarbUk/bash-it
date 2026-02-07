@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034 # Expected behavior for themes.
 
 # Prompt defaut configuration
-BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun docker pre_commit terraform mysql cloud duration exit"}
+BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun docker pre_commit terraform mysql ansible cloud duration exit"}
 
 # Theme custom glyphs
 # SCM
@@ -30,6 +30,7 @@ TERRAFORM_CHAR=${BARBUK_TERRAFORM_CHAR:="❲t❳ "}
 DOCKER_CHAR=${BARBUK_DOCKER_CHAR:=" "}
 MYSQL_CHAR=${BARBUK_MYSQL_CHAR:=" "}
 MARIADB_CHAR=${BARBUK_MARIADB_CHAR:=" "}
+ANSIBLE_CHAR=${BARBUK_ANSIBLE_CHAR:=" "}
 # Cloud
 AWS_PROFILE_CHAR=${BARBUK_AWS_PROFILE_CHAR:=" aws "}
 SCALEWAY_PROFILE_CHAR=${BARBUK_SCALEWAY_PROFILE_CHAR:=" scw "}
@@ -273,6 +274,31 @@ function __mysql_prompt() {
 			fi
 			echo "${bold_blue?}${char}${normal?}${user} "
 		fi
+	fi
+}
+
+function __ansible_prompt() {
+	local config
+	# Ansible will check:
+	# ANSIBLE_CONFIG (environment variable if set)
+	# ansible.cfg (in the current directory)
+	# ~/.ansible.cfg (in the home directory)
+	# /etc/ansible/ansible.cfg
+	#
+	# Ansible will process the above list and use the first file found, all others are ignored.
+	if [ -n "$ANSIBLE_CONFIG" ]; then
+		config="$ANSIBLE_CONFIG"
+	elif [ -f ansible.cfg ]; then
+		config=ansible.cfg
+	elif [ -f "$HOME/.ansible.cfg" ] && [ "$ANSIBLE_HOME_DISPLAY" = true ]; then
+		# shellcheck disable=SC2088
+		config="~/.ansible.cfg"
+	elif [ -f /etc/ansible/ansible.cfg ]; then
+		config="/etc/ansible/ansible.cfg"
+	fi
+
+	if [ -n "$config" ]; then
+		echo "${bold_purple?}${ANSIBLE_CHAR}${normal?}${config} "
 	fi
 }
 
