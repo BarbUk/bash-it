@@ -241,6 +241,8 @@ function __docker_prompt() {
 			docker_context="$DOCKER_CONTEXT"
 		elif [ -n "$DOCKER_HOST" ]; then
 			docker_context="$DOCKER_HOST"
+		elif [ -f .env ] && grep -qF COMPOSE_PROJECT_NAME .env; then
+			docker_context=$(awk -F'[ \t\n=]+' '/COMPOSE_PROJECT_NAME/ {print $2; exit}' .env)
 		fi
 		echo "${bold_blue?}${DOCKER_CHAR}${normal?}${docker_context} "
 	fi
