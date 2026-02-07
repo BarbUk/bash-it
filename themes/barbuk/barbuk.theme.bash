@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034 # Expected behavior for themes.
 
 # Prompt defaut configuration
-BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun docker pre_commit terraform cloud duration exit"}
+BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun docker pre_commit terraform mysql ansible cloud duration exit"}
 
 # Theme custom glyphs
 # SCM
@@ -28,6 +28,9 @@ NODE_CHAR=${BARBUK_NODE_CHAR:=' '}
 BUN_CHAR=${BARBUK_BUN_CHAR:='🍞 '}
 TERRAFORM_CHAR=${BARBUK_TERRAFORM_CHAR:="❲t❳ "}
 DOCKER_CHAR=${BARBUK_DOCKER_CHAR:=" "}
+MYSQL_CHAR=${BARBUK_MYSQL_CHAR:=" "}
+MARIADB_CHAR=${BARBUK_MARIADB_CHAR:=" "}
+ANSIBLE_CHAR=${BARBUK_ANSIBLE_CHAR:=" "}
 # Cloud
 AWS_PROFILE_CHAR=${BARBUK_AWS_PROFILE_CHAR:=" aws "}
 SCALEWAY_PROFILE_CHAR=${BARBUK_SCALEWAY_PROFILE_CHAR:=" scw "}
@@ -40,6 +43,9 @@ GCLOUD_CHAR=${BARBUK_GCLOUD_CHAR:=" google "}
 # Ssh user and hostname display
 SSH_INFO=${BARBUK_SSH_INFO:=true}
 HOST_INFO=${BARBUK_HOST_INFO:=long}
+
+# Home info display
+ANSIBLE_HOME_DISPLAY=${BARBUK_ANSIBLE_HOME_DISPLAY:=false}
 
 # Bash-it default glyphs overrides
 SCM_NONE_CHAR=
@@ -241,8 +247,58 @@ function __docker_prompt() {
 			docker_context="$DOCKER_CONTEXT"
 		elif [ -n "$DOCKER_HOST" ]; then
 			docker_context="$DOCKER_HOST"
+		elif [ -f .env ] && grep -qF COMPOSE_PROJECT_NAME .env; then
+			docker_context=$(awk -F'[ \t\n=]+' '/COMPOSE_PROJECT_NAME/ {print $2; exit}' .env)
 		fi
 		echo "${bold_blue?}${DOCKER_CHAR}${normal?}${docker_context} "
+	fi
+}
+
+function __mysql_prompt() {
+	# \R displays current time in 24 HR format
+	# \m displays the minutes
+	# \s displays the seconds
+	# \U displays username@hostname accountname
+	# \c displays a mysql statement counter. keeps increasing as you type commands.
+	# \d displays default database
+	export MYSQL_PS1="\R:\m:\s (\U) \c [\d]> "
+
+	local user char
+
+	if [ -f "$HOME/.my.cnf" ]; then
+		user=$(awk -F'[ \t\n=]+' '/user/ {print $2; exit}' "$HOME/.my.cnf")
+		char="$MYSQL_CHAR"
+		if [ -n "$user" ]; then
+			if _command_exists mariadb; then
+				char="$MARIADB_CHAR"
+			fi
+			echo "${bold_blue?}${char}${normal?}${user} "
+		fi
+	fi
+}
+
+function __ansible_prompt() {
+	local config
+	# Ansible will check:
+	# ANSIBLE_CONFIG (environment variable if set)
+	# ansible.cfg (in the current directory)
+	# ~/.ansible.cfg (in the home directory)
+	# /etc/ansible/ansible.cfg
+	#
+	# Ansible will process the above list and use the first file found, all others are ignored.
+	if [ -n "$ANSIBLE_CONFIG" ]; then
+		config="$ANSIBLE_CONFIG"
+	elif [ -f ansible.cfg ]; then
+		config=ansible.cfg
+	elif [ -f "$HOME/.ansible.cfg" ] && [ "$ANSIBLE_HOME_DISPLAY" = true ]; then
+		# shellcheck disable=SC2088
+		config="~/.ansible.cfg"
+	elif [ -f /etc/ansible/ansible.cfg ]; then
+		config="/etc/ansible/ansible.cfg"
+	fi
+
+	if [ -n "$config" ]; then
+		echo "${bold_purple?}${ANSIBLE_CHAR}${normal?}${config} "
 	fi
 }
 

@@ -32,11 +32,14 @@ available block:
 * python_venv
 * ruby
 * node
-* uv 
+* uv
 * bun
 * pre_commit
 * terraform
 * cloud
+* mysql
+* docker
+* ansible
 * duration
 * exit
 
@@ -66,13 +69,19 @@ Default theme glyphs
    BARBUK_SVN_CHAR='⑆ '
    BARBUK_EXIT_CODE_ICON=' '
    BARBUK_PYTHON_VENV_CHAR=' '
+   BARBUK_UV_CHAR:='🐍'
    BARBUK_COMMAND_DURATION_ICON='  '
    BARBUK_RUBY_CHAR=' '
    BARBUK_NODE_CHAR=' '
+   BARBUK_BUN_CHAR:='🍞 '
    BARBUK_TERRAFORM_CHAR="❲t❳ "
    BARBUK_AWS_PROFILE_CHAR=" aws "
    BARBUK_SCALEWAY_PROFILE_CHAR=" scw "
    BARBUK_GCLOUD_CHAR=" gcp "
+   BARBUK_DOCKER_CHAR:=" "
+   BARBUK_MYSQL_CHAR:=" "
+   BARBUK_MARIADB_CHAR:=" "
+   BARBUK_ANSIBLE_CHAR:=" "
 
 Customize glyphs
 ^^^^^^^^^^^^^^^^
