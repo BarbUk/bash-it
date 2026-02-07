@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034 # Expected behavior for themes.
 
 # Prompt defaut configuration
-BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun docker pre_commit terraform cloud duration exit"}
+BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun docker pre_commit terraform mysql cloud duration exit"}
 
 # Theme custom glyphs
 # SCM
@@ -28,6 +28,8 @@ NODE_CHAR=${BARBUK_NODE_CHAR:=' '}
 BUN_CHAR=${BARBUK_BUN_CHAR:='🍞 '}
 TERRAFORM_CHAR=${BARBUK_TERRAFORM_CHAR:="❲t❳ "}
 DOCKER_CHAR=${BARBUK_DOCKER_CHAR:=" "}
+MYSQL_CHAR=${BARBUK_MYSQL_CHAR:=" "}
+MARIADB_CHAR=${BARBUK_MARIADB_CHAR:=" "}
 # Cloud
 AWS_PROFILE_CHAR=${BARBUK_AWS_PROFILE_CHAR:=" aws "}
 SCALEWAY_PROFILE_CHAR=${BARBUK_SCALEWAY_PROFILE_CHAR:=" scw "}
@@ -245,6 +247,34 @@ function __docker_prompt() {
 			docker_context=$(awk -F'[ \t\n=]+' '/COMPOSE_PROJECT_NAME/ {print $2; exit}' .env)
 		fi
 		echo "${bold_blue?}${DOCKER_CHAR}${normal?}${docker_context} "
+	fi
+}
+
+function __mysql_prompt() {
+	# \R displays current time in 24 HR format
+	# \m displays the minutes
+	# \s displays the seconds
+	# \U displays username@hostname accountname
+	# \c displays a mysql statement counter. keeps increasing as you type commands.
+	# \d displays default database
+	export MYSQL_PS1="\R:\m:\s (\U) \c [\d]> "
+
+	local user char config
+
+	if [ -f "$HOME/.my.cnf" ]; then
+		config="$HOME/.my.cnf"
+	elif [ -f .my.cnf ]; then
+		config=.my.cnf
+	fi
+	if [ -n "$config" ]; then
+		user=$(awk -F'[ \t\n=]+' '/user/ {print $2; exit}' "$config")
+		char="$MYSQL_CHAR"
+		if [ -n "$user" ]; then
+			if _command_exists mariadb; then
+				char="$MARIADB_CHAR"
+			fi
+			echo "${bold_blue?}${char}${normal?}${user} "
+		fi
 	fi
 }
 
