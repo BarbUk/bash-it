@@ -2,13 +2,15 @@
 # shellcheck disable=SC2034 # Expected behavior for themes.
 
 # Prompt defaut configuration
-BARBUK_PROMPT=${BARBUK_PROMPT:="git-uptream-remote-logo ssh path scm python_venv ruby node terraform cloud duration exit"}
+BARBUK_PROMPT=${BARBUK_PROMPT:="git-upstream-remote-logo ssh path scm python_venv uv ruby node bun pre_commit terraform cloud duration exit"}
 
 # Theme custom glyphs
 # SCM
 SCM_GIT_CHAR_GITLAB=${BARBUK_GITLAB_CHAR:='  '}
 SCM_GIT_CHAR_BITBUCKET=${BARBUK_BITBUCKET_CHAR:='  '}
 SCM_GIT_CHAR_GITHUB=${BARBUK_GITHUB_CHAR:='  '}
+SCM_GIT_CHAR_ARCHLINUX=${BARBUK_ARCHLINUX_CHAR:='  '}
+SCM_GIT_CHAR_CODEBERG=${BARBUK_CODEBERG_CHAR:='  '}
 SCM_GIT_CHAR_DEFAULT=${BARBUK_GIT_DEFAULT_CHAR:='  '}
 SCM_GIT_CHAR_ICON_BRANCH=${BARBUK_GIT_BRANCH_ICON:=''}
 SCM_HG_CHAR=${BARBUK_HG_CHAR:='☿ '}
@@ -17,9 +19,13 @@ SCM_THEME_CURRENT_USER_PREFFIX=${normal?}${BARBUK_CURRENT_USER_PREFFIX:='  '}
 # Exit code
 EXIT_CODE_ICON=${BARBUK_EXIT_CODE_ICON:=' '}
 # Programming and tools
+PRE_COMMIT_CHAR=${BARBUK_PRE_COMMIT_CHAR:=' '}
+PREK_CHAR=${BARBUK_PREK_CHAR:='⚡'}
 PYTHON_VENV_CHAR=${BARBUK_PYTHON_VENV_CHAR:=' '}
+UV_CHAR=${BARBUK_UV_CHAR:='🐍'}
 RUBY_CHAR=${BARBUK_RUBY_CHAR:=' '}
 NODE_CHAR=${BARBUK_NODE_CHAR:=' '}
+BUN_CHAR=${BARBUK_BUN_CHAR:='🍞 '}
 TERRAFORM_CHAR=${BARBUK_TERRAFORM_CHAR:="❲t❳ "}
 # Cloud
 AWS_PROFILE_CHAR=${BARBUK_AWS_PROFILE_CHAR:=" aws "}
@@ -59,20 +65,31 @@ RBENV_THEME_PROMPT_SUFFIX=''
 RBFU_THEME_PROMPT_PREFIX=''
 RBFU_THEME_PROMPT_SUFFIX=''
 
-function __git-uptream-remote-logo_prompt() {
+function __get_domain_from_git_remote() {
+	local git_remote="$1"
+	echo "$git_remote" | awk -F'[@:]' '$1 ~ /ssh/ {domain=$3} $1 ~ /https/ {domain=$2} $1 ~ /git/ {domain=$2} { sub("//", "", domain); sub(/\/.*$/, "", domain); print domain }'
+}
+
+function __git-upstream-remote-logo_prompt() {
 	[[ -z "$(_git-upstream)" ]] && SCM_GIT_CHAR="${SCM_GIT_CHAR_DEFAULT:-}"
 
 	local remote remote_domain
 	remote="$(_git-upstream-remote)"
-	remote_domain="$(git config --get remote."${remote}".url | awk -F'[@:.]' '{print $2}')"
 
-	# remove // suffix for https:// url
-	remote_domain="${remote_domain//\//}"
+	if [ -z "$remote" ]; then
+		remote=$(git ls-remote --get-url 2> /dev/null)
+	else
+		remote=$(git config --get remote."${remote}".url)
+	fi
+
+	remote_domain=$(__get_domain_from_git_remote "$remote")
 
 	case "${remote_domain}" in
-		github) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITHUB:-}" ;;
-		gitlab) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITLAB:-}" ;;
-		bitbucket) SCM_GIT_CHAR="${SCM_GIT_CHAR_BITBUCKET:-}" ;;
+		github.com) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITHUB:-}" ;;
+		gitlab.com) SCM_GIT_CHAR="${SCM_GIT_CHAR_GITLAB:-}" ;;
+		bitbucket.com) SCM_GIT_CHAR="${SCM_GIT_CHAR_BITBUCKET:-}" ;;
+		codeberg.org) SCM_GIT_CHAR="${SCM_GIT_CHAR_CODEBERG:-}" ;;
+		aur.archlinux.org) SCM_GIT_CHAR="${SCM_GIT_CHAR_ARCHLINUX:-}" ;;
 		*) SCM_GIT_CHAR="${SCM_GIT_CHAR_DEFAULT:-}" ;;
 	esac
 
@@ -133,6 +150,16 @@ function __node_prompt() {
 	[[ -n "${node_version}" ]] && echo "${bold_purple?}${NODE_CHAR}${normal?}${node_version} "
 }
 
+function __bun_prompt() {
+	if [[ -f bun.lockb || -f bun.lock ]]; then
+		local bun_version=""
+		if _command_exists bun; then
+			bun_version=$(bun --version 2> /dev/null)
+		fi
+		echo "${bold_purple?}${BUN_CHAR}${normal?}${bun_version} "
+	fi
+}
+
 function __ruby_prompt() {
 	local ruby_version=""
 
@@ -153,11 +180,36 @@ function __ssh_prompt() {
 }
 
 function __python_venv_prompt() {
-	# Detect python venv
+	local python_info=""
 	if [[ -n "${CONDA_DEFAULT_ENV}" ]]; then
-		echo "${bold_purple?}$PYTHON_VENV_CHAR${normal?}${CONDA_DEFAULT_ENV} "
-	elif [[ -n "${VIRTUAL_ENV}" ]]; then
-		echo "${bold_purple?}$PYTHON_VENV_CHAR${normal?}$(basename "${VIRTUAL_ENV}") "
+		python_info="${CONDA_DEFAULT_ENV}"
+	elif [[ -n "${VIRTUAL_ENV_PROMPT}" ]]; then
+		python_info="${VIRTUAL_ENV_PROMPT}"
+	elif [[ -f pyproject.toml ]]; then
+		python_info=$(awk -F'"' '/^requires-python/ {print $2}' pyproject.toml)
+		[[ -z "${python_info}" ]] && python_info="py"
+	fi
+
+	if [[ -n "${python_info}" ]]; then
+		echo "${bold_purple?}$PYTHON_VENV_CHAR${normal?}${python_info} "
+	fi
+}
+
+function __uv_prompt() {
+	if [[ -f uv.lock ]]; then
+		echo "${bold_purple?}${UV_CHAR}${normal?} "
+	fi
+}
+
+function __pre_commit_prompt() {
+	if [[ -f .pre-commit-config.yaml ]]; then
+		local icon="${PRE_COMMIT_CHAR}"
+		if [[ -f .git/hooks/pre-commit ]]; then
+			if grep -q "prek" .git/hooks/pre-commit 2> /dev/null; then
+				icon="${PREK_CHAR}"
+			fi
+		fi
+		echo "${bold_purple?}${icon}${normal?} "
 	fi
 }
 
