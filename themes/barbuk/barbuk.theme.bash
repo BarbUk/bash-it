@@ -43,6 +43,9 @@ GCLOUD_CHAR=${BARBUK_GCLOUD_CHAR:=" google "}
 SSH_INFO=${BARBUK_SSH_INFO:=true}
 HOST_INFO=${BARBUK_HOST_INFO:=long}
 
+# Home info display
+ANSIBLE_HOME_DISPLAY=${BARBUK_ANSIBLE_HOME_DISPLAY:=false}
+
 # Bash-it default glyphs overrides
 SCM_NONE_CHAR=
 SCM_THEME_PROMPT_DIRTY=" ${bold_red?}✗"
@@ -259,15 +262,10 @@ function __mysql_prompt() {
 	# \d displays default database
 	export MYSQL_PS1="\R:\m:\s (\U) \c [\d]> "
 
-	local user char config
+	local user char
 
 	if [ -f "$HOME/.my.cnf" ]; then
-		config="$HOME/.my.cnf"
-	elif [ -f .my.cnf ]; then
-		config=.my.cnf
-	fi
-	if [ -n "$config" ]; then
-		user=$(awk -F'[ \t\n=]+' '/user/ {print $2; exit}' "$config")
+		user=$(awk -F'[ \t\n=]+' '/user/ {print $2; exit}' "$HOME/.my.cnf")
 		char="$MYSQL_CHAR"
 		if [ -n "$user" ]; then
 			if _command_exists mariadb; then
