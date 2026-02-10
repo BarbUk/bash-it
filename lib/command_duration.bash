@@ -73,7 +73,7 @@ function _command_duration() {
 	command_duration=$((current_time_seconds - command_start_seconds))
 
 	# Calculate microseconds if both timestamps have fractional parts
-	if [[ "$COMMAND_DURATION_START_SECONDS" == *.* ]] && [[ "$current_time" == *.* ]]; then
+	if [[ "$COMMAND_DURATION_START_SECONDS" == *.* ]] && [[ "$current_time" == *.* ]] && ((COMMAND_DURATION_PRECISION > 0)); then
 		local -i command_start_microseconds=$((10#${COMMAND_DURATION_START_SECONDS##*.}))
 		local -i current_time_microseconds="$((10#${current_time##*.}))"
 
@@ -95,8 +95,10 @@ function _command_duration() {
 		_dynamic_clock_icon "${command_duration}"
 		if ((minutes > 0)); then
 			printf "%s %s%dm %ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$minutes" "$seconds"
-		else
+		elif ((COMMAND_DURATION_PRECISION > 0)); then
 			printf "%s %s%d.%01ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds" "$microseconds"
+		else
+			printf "%s %s%ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds"
 		fi
 	fi
 }
