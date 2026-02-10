@@ -1,4 +1,5 @@
 # shellcheck shell=bats
+# shellcheck disable=2034,2329
 
 load "${MAIN_BASH_IT_DIR?}/test/test_helper.bash"
 
