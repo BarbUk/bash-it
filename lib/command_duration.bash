@@ -32,6 +32,7 @@ function _command_duration_current_time() {
 : "${COMMAND_DURATION_START_SECONDS:=$(_command_duration_current_time)}"
 : "${COMMAND_DURATION_ICON:=🕘}"
 : "${COMMAND_DURATION_MIN_SECONDS:=1}"
+: "${COMMAND_DURATION_PRECISION:=1}"
 
 function _command_duration_pre_exec() {
 	COMMAND_DURATION_START_SECONDS="$(_command_duration_current_time)"
@@ -63,7 +64,7 @@ function _command_duration() {
 	current_time="$(_command_duration_current_time)"
 
 	local -i command_duration=0
-	local -i minutes=0 seconds=0 deciseconds=0
+	local -i minutes=0 seconds=0 microseconds=0
 
 	local -i command_start_seconds=${COMMAND_DURATION_START_SECONDS%.*}
 	local -i current_time_seconds=${current_time%.*}
@@ -71,26 +72,20 @@ function _command_duration() {
 	# Calculate seconds difference
 	command_duration=$((current_time_seconds - command_start_seconds))
 
-	# Calculate deciseconds if both timestamps have fractional parts
+	# Calculate microseconds if both timestamps have fractional parts
 	if [[ "$COMMAND_DURATION_START_SECONDS" == *.* ]] && [[ "$current_time" == *.* ]]; then
-		local -i command_start_deciseconds=$((10#${COMMAND_DURATION_START_SECONDS##*.}))
-		local -i current_time_deciseconds="$((10#${current_time##*.}))"
+		local -i command_start_microseconds=$((10#${COMMAND_DURATION_START_SECONDS##*.}))
+		local -i current_time_microseconds="$((10#${current_time##*.}))"
 
-		# Take first digit for deciseconds
-		command_start_deciseconds="${command_start_deciseconds:0:1}"
-		current_time_deciseconds="${current_time_deciseconds:0:1}"
-
-		if ((current_time_deciseconds >= command_start_deciseconds)); then
-			deciseconds=$((current_time_deciseconds - command_start_deciseconds))
+		if ((current_time_microseconds >= command_start_microseconds)); then
+			microseconds=$((current_time_microseconds - command_start_microseconds))
 		else
 			((command_duration -= 1))
-			deciseconds=$((10 + current_time_deciseconds - command_start_deciseconds))
+			microseconds=$((1000000 + current_time_microseconds - command_start_microseconds))
 		fi
-	fi
 
-	if ((command_duration < 0)); then
-		command_duration=0
-		deciseconds=0
+		# Take first N digits
+		microseconds="${microseconds:0:$COMMAND_DURATION_PRECISION}"
 	fi
 
 	if ((command_duration >= COMMAND_DURATION_MIN_SECONDS)); then
@@ -101,7 +96,7 @@ function _command_duration() {
 		if ((minutes > 0)); then
 			printf "%s %s%dm %ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$minutes" "$seconds"
 		else
-			printf "%s %s%d.%01ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds" "$deciseconds"
+			printf "%s %s%d.%01ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds" "$microseconds"
 		fi
 	fi
 }
