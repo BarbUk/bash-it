@@ -53,12 +53,15 @@ Command duration can be enabled by exporting ``BASH_IT_COMMAND_DURATION``:
 
    export BASH_IT_COMMAND_DURATION=true
 
-The default configuration display last command duration for command lasting one second or more.
-You can customize the minimum time in seconds before command duration is displayed in your ``.bashrc``:
+The default configuration display last command duration for command lasting one second or more,
+with deciseconds precision.
+
+You can customize the minimum time in seconds before command duration is displayed or the precison in your ``.bashrc``:
 
 .. code-block:: bash
 
    export COMMAND_DURATION_MIN_SECONDS=5
+   export COMMAND_DURATION_PRECISION=2
 
 Clock Related
 =============
