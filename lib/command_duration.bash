@@ -2,6 +2,21 @@
 #
 # Functions for measuring and reporting how long a command takes to run.
 
+# Notice: This function used to run as a sub-shell while defining:
+# local LC_ALL=C
+#
+# This was done to:
+#  - enforce the decimal point to be a period
+#  - use the local 'C' which is ensured by the C and POSIX standards
+#  - not overide the user defined locale
+#
+# We now use EPOCHREALTIME, while replacing any char different that a digit by a period
+#
+# Technically, one can define a locale with decimal_point being an arbitrary string.
+# For example, ps_AF seems to use U+066B as the decimal point.
+#
+# cf: https://github.com/Bash-it/bash-it/pull/2366#discussion_r2760681820
+#
 # Get shell duration in decimal format regardless of runtime locale.
 function _command_duration_current_time() {
 	local current_time
