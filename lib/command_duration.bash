@@ -84,7 +84,8 @@ function _command_duration() {
 			microseconds=$((1000000 + current_time_microseconds - command_start_microseconds))
 		fi
 
-		# Take first N digits
+		# Pad with leading zeros to 6 digits, then take first N digits
+		printf -v microseconds '%06d' "$microseconds"
 		microseconds="${microseconds:0:$COMMAND_DURATION_PRECISION}"
 	fi
 
