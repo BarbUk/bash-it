@@ -76,7 +76,7 @@ function _command_duration() {
 	# Calculate microseconds if both timestamps have fractional parts
 	if [[ "$COMMAND_DURATION_START_SECONDS" == *.* ]] && [[ "$current_time" == *.* ]] && ((COMMAND_DURATION_PRECISION > 0)); then
 		local -i command_start_microseconds=$((10#${COMMAND_DURATION_START_SECONDS##*.}))
-		local -i current_time_microseconds="$((10#${current_time##*.}))"
+		local -i current_time_microseconds=$((10#${current_time##*.}))
 
 		if ((current_time_microseconds >= command_start_microseconds)); then
 			microseconds=$((current_time_microseconds - command_start_microseconds))
