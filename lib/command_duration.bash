@@ -10,7 +10,7 @@
 #  - use the locale 'C' which is ensured by the C and POSIX standards
 #  - not overide the user defined locale
 #
-# We now use EPOCHREALTIME, while replacing any char different that a digit by a period
+# We now use EPOCHREALTIME, while replacing any non-digit character by a period.
 #
 # Technically, one can define a locale with decimal_point being an arbitrary string.
 # For example, ps_AF seems to use U+066B as the decimal point.
