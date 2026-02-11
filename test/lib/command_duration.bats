@@ -13,6 +13,18 @@ function local_setup_file() {
 	assert_output --regexp '^[0-9]+(\.[0-9]+)?$'
 }
 
+@test "command_duration: _command_duration_current_time without EPOCHREALTIME" {
+	_command_duration_current_time_no_epoch() {
+		local EPOCHREALTIME
+		unset EPOCHREALTIME
+		local SECONDS=123
+		_command_duration_current_time
+	}
+	run _command_duration_current_time_no_epoch
+	assert_success
+	assert_output "123"
+}
+
 @test "command_duration: _command_duration_pre_exec" {
 	_command_duration_pre_exec
 	assert [ -n "$COMMAND_DURATION_START_SECONDS" ]
@@ -105,4 +117,15 @@ function local_setup_file() {
 	_command_duration_current_time() { echo 105.002000; }
 	run _command_duration
 	assert_output --regexp ".* 5.001s$"
+}
+
+@test "command_duration: _command_duration without EPOCHREALTIME (SECONDS only)" {
+	BASH_IT_COMMAND_DURATION=true
+	COMMAND_DURATION_MIN_SECONDS=1
+	COMMAND_DURATION_PRECISION=1
+	# Mock _command_duration_current_time to return integer (like SECONDS would)
+	_command_duration_current_time() { echo 105; }
+	COMMAND_DURATION_START_SECONDS=100
+	run _command_duration
+	assert_output --regexp ".* 5.0s$"
 }
