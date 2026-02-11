@@ -8,7 +8,7 @@
 # This was done to:
 #  - enforce the decimal point to be a period
 #  - use the locale 'C' which is ensured by the C and POSIX standards
-#  - not overide the user defined locale
+#  - not override the user-defined locale
 #
 # We now use EPOCHREALTIME, while replacing any non-digit character by a period.
 #
