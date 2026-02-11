@@ -5,15 +5,16 @@
 # Notice: This function used to run as a sub-shell while defining:
 # local LC_ALL=C
 #
-# This was done to:
-#  - enforce the decimal point to be a period
-#  - use the local 'C' which is ensured by the C and POSIX standards
-#  - not overide the user defined locale
+# DFARREL You would think LC_NUMERIC would do it, but not working in my local.
+# Note: LC_ALL='en_US.UTF-8' has been used to enforce the decimal point to be
+# a period, but the specific locale 'en_US.UTF-8' is not ensured to exist in
+# the system.  One should instead use the locale 'C', which is ensured by the
+# C and POSIX standards.
 #
-# We now use EPOCHREALTIME, while replacing any char different that a digit by a period
+# We now use EPOCHREALTIME, while replacing any non-digit character by a period.
 #
 # Technically, one can define a locale with decimal_point being an arbitrary string.
-# For example, ps_AF seems to use U+066B as the decimal point.
+# For example, ps_AF uses U+066B as the decimal point.
 #
 # cf: https://github.com/Bash-it/bash-it/pull/2366#discussion_r2760681820
 #
@@ -65,7 +66,7 @@ function _command_duration() {
 
 	local -i command_duration=0
 	local -i minutes=0 seconds=0
-	local microseconds=0
+	local microseconds=""
 
 	local -i command_start_seconds=${COMMAND_DURATION_START_SECONDS%.*}
 	local -i current_time_seconds=${current_time%.*}
@@ -87,7 +88,7 @@ function _command_duration() {
 
 		# Pad with leading zeros to 6 digits, then take first N digits
 		printf -v microseconds '%06d' "$microseconds"
-		microseconds="$((10#${microseconds:0:$COMMAND_DURATION_PRECISION}))"
+		microseconds="${microseconds:0:$COMMAND_DURATION_PRECISION}"
 	fi
 
 	if ((command_duration >= COMMAND_DURATION_MIN_SECONDS)); then
@@ -98,7 +99,7 @@ function _command_duration() {
 		if ((minutes > 0)); then
 			printf "%s %s%dm %ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$minutes" "$seconds"
 		elif ((COMMAND_DURATION_PRECISION > 0)); then
-			printf "%s %s%d.%0${COMMAND_DURATION_PRECISION}ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds" "$microseconds"
+			printf "%s %s%ss" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds${microseconds:+.$microseconds}"
 		else
 			printf "%s %s%ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds"
 		fi
