@@ -127,5 +127,5 @@ function local_setup_file() {
 	_command_duration_current_time() { echo 105; }
 	COMMAND_DURATION_START_SECONDS=100
 	run _command_duration
-	assert_output --regexp ".* 5.0s$"
+	assert_output --regexp ".* 5s$"
 }

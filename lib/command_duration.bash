@@ -65,7 +65,7 @@ function _command_duration() {
 
 	local -i command_duration=0
 	local -i minutes=0 seconds=0
-	local microseconds=0
+	local microseconds=""
 
 	local -i command_start_seconds=${COMMAND_DURATION_START_SECONDS%.*}
 	local -i current_time_seconds=${current_time%.*}
@@ -87,7 +87,7 @@ function _command_duration() {
 
 		# Pad with leading zeros to 6 digits, then take first N digits
 		printf -v microseconds '%06d' "$microseconds"
-		microseconds="$((10#${microseconds:0:$COMMAND_DURATION_PRECISION}))"
+		microseconds="${microseconds:0:$COMMAND_DURATION_PRECISION}"
 	fi
 
 	if ((command_duration >= COMMAND_DURATION_MIN_SECONDS)); then
@@ -98,7 +98,7 @@ function _command_duration() {
 		if ((minutes > 0)); then
 			printf "%s %s%dm %ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$minutes" "$seconds"
 		elif ((COMMAND_DURATION_PRECISION > 0)); then
-			printf "%s %s%d.%0${COMMAND_DURATION_PRECISION}ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds" "$microseconds"
+			printf "%s %s%ss" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds${microseconds:+.$microseconds}"
 		else
 			printf "%s %s%ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds"
 		fi
