@@ -5,10 +5,11 @@
 # Notice: This function used to run as a sub-shell while defining:
 # local LC_ALL=C
 #
-# This was done to:
-#  - enforce the decimal point to be a period
-#  - use the locale 'C' which is ensured by the C and POSIX standards
-#  - not override the user-defined locale
+# DFARREL You would think LC_NUMERIC would do it, but not working in my local.
+# Note: LC_ALL='en_US.UTF-8' has been used to enforce the decimal point to be
+# a period, but the specific locale 'en_US.UTF-8' is not ensured to exist in
+# the system.  One should instead use the locale 'C', which is ensured by the
+# C and POSIX standards.
 #
 # We now use EPOCHREALTIME, while replacing any non-digit character by a period.
 #
