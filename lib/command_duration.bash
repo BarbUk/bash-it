@@ -13,7 +13,7 @@
 # We now use EPOCHREALTIME, while replacing any non-digit character by a period.
 #
 # Technically, one can define a locale with decimal_point being an arbitrary string.
-# For example, ps_AF seems to use U+066B as the decimal point.
+# For example, ps_AF uses U+066B as the decimal point.
 #
 # cf: https://github.com/Bash-it/bash-it/pull/2366#discussion_r2760681820
 #
