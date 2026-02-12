@@ -76,6 +76,17 @@ function local_setup_file() {
 	assert_output --regexp ".* 5s$"
 }
 
+@test "command_duration: _command_duration precision 0 with microseconds time" {
+	BASH_IT_COMMAND_DURATION=true
+	COMMAND_DURATION_MIN_SECONDS=1
+	COMMAND_DURATION_PRECISION=0
+	# Mock _command_duration_current_time
+	_command_duration_current_time() { echo 105.600005; }
+	COMMAND_DURATION_START_SECONDS=100.200007
+	run _command_duration
+	assert_output --regexp ".* 5s$"
+}
+
 @test "command_duration: _command_duration with precision" {
 	BASH_IT_COMMAND_DURATION=true
 	COMMAND_DURATION_MIN_SECONDS=1
