@@ -98,10 +98,8 @@ function _command_duration() {
 		_dynamic_clock_icon "${command_duration}"
 		if ((minutes > 0)); then
 			printf "%s %s%dm %ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$minutes" "$seconds"
-		elif ((COMMAND_DURATION_PRECISION > 0)); then
-			printf "%s %s%ss" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds${microseconds:+.$microseconds}"
 		else
-			printf "%s %s%ds" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds"
+			printf "%s %s%ss" "${COMMAND_DURATION_ICON:-}" "${COMMAND_DURATION_COLOR:-}" "$seconds${microseconds:+.$microseconds}"
 		fi
 	fi
 }
